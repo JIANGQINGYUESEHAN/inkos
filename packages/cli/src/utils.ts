@@ -16,7 +16,16 @@ export async function loadConfig(): Promise<ProjectConfig> {
   const configPath = join(root, "inkos.json");
   try {
     const raw = await readFile(configPath, "utf-8");
-    return ProjectConfigSchema.parse(JSON.parse(raw));
+    const config = JSON.parse(raw);
+
+    // .env overrides inkos.json for LLM settings
+    const env = process.env;
+    if (env.INKOS_LLM_PROVIDER) config.llm.provider = env.INKOS_LLM_PROVIDER;
+    if (env.INKOS_LLM_BASE_URL) config.llm.baseUrl = env.INKOS_LLM_BASE_URL;
+    if (env.INKOS_LLM_API_KEY) config.llm.apiKey = env.INKOS_LLM_API_KEY;
+    if (env.INKOS_LLM_MODEL) config.llm.model = env.INKOS_LLM_MODEL;
+
+    return ProjectConfigSchema.parse(config);
   } catch (e) {
     throw new Error(
       `Failed to load inkos.json from ${root}. Run 'inkos init' first.`,
