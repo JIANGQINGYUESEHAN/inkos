@@ -475,21 +475,32 @@ export class PipelineRunner {
           output.content,
           chapterNumber,
           auditResult.issues,
-          "rewrite",
+          "spot-fix",
           book.genre,
         );
 
         if (reviseOutput.revisedContent.length > 0) {
-          finalContent = reviseOutput.revisedContent;
-          finalWordCount = reviseOutput.wordCount;
-          revised = true;
+          // Guard: reject revision if AI markers increased
+          const preMarkers = analyzeAITells(output.content);
+          const postMarkers = analyzeAITells(reviseOutput.revisedContent);
+          const preCount = preMarkers.issues.length;
+          const postCount = postMarkers.issues.length;
 
-          // Re-audit the revised content
+          if (postCount > preCount) {
+            // Revision made text MORE AI-like — discard it, keep original
+          } else {
+            finalContent = reviseOutput.revisedContent;
+            finalWordCount = reviseOutput.wordCount;
+            revised = true;
+          }
+
+          // Re-audit the (possibly revised) content
           const reAudit = await auditor.auditChapter(
             bookDir,
             finalContent,
             chapterNumber,
             book.genre,
+            { temperature: 0 },
           );
           const reAITells = analyzeAITells(finalContent);
           const reSensitive = analyzeSensitiveWords(finalContent);

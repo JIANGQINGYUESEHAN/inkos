@@ -18,7 +18,7 @@ export interface ReviseOutput {
 }
 
 const MODE_DESCRIPTIONS: Record<ReviseMode, string> = {
-  polish: "润色：只改表达、节奏、段落呼吸，不改事实与剧情结论",
+  polish: "润色：只改表达、节奏、段落呼吸，不改事实与剧情结论。禁止：增删段落、改变人名/地名/物品名、增加新情节或新对话、改变因果关系。只允许：替换用词、调整句序、修改标点节奏",
   rewrite: "改写：可改叙述顺序、画面、力度，但保留核心事实与人物动机",
   rework: "重写：可重构场景推进和冲突组织，但不改主设定和大事件结果",
   "anti-detect": `反检测改写：在保持剧情不变的前提下，降低AI生成可检测性。

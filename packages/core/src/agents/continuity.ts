@@ -171,6 +171,7 @@ export class ContinuityAuditor extends BaseAgent {
     chapterContent: string,
     chapterNumber: number,
     genre?: string,
+    options?: { temperature?: number },
   ): Promise<AuditResult> {
     const [currentState, ledger, hooks, styleGuideRaw, subplotBoard, emotionalArcs, characterMatrix, chapterSummaries, parentCanon] =
       await Promise.all([
@@ -271,7 +272,7 @@ ${chapterContent}`;
       { role: "system" as const, content: systemPrompt },
       { role: "user" as const, content: userPrompt },
     ];
-    const chatOptions = { temperature: 0.3, maxTokens: 4096 };
+    const chatOptions = { temperature: options?.temperature ?? 0.3, maxTokens: 4096 };
 
     // Use web search for fact verification when eraResearch is enabled
     const response = gp.eraResearch
