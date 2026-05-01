@@ -149,7 +149,7 @@ export class ArchitectAgent extends BaseAgent {
     const response = await this.chat([
       { role: "system", content: langPrefix + systemPrompt + revisePrompt },
       { role: "user", content: userMessage },
-    ], { temperature: 0.8 });
+    ], { temperature: 0.6 });
 
     return this.parseSections(response.content, resolvedLanguage);
   }
@@ -232,6 +232,15 @@ ${eraBlock}
 - roles 总 ≤ 8000 chars
 - book_rules ≤ 500 chars（仅 YAML）
 - pending_hooks ≤ 2000 chars
+
+## 自审清单（生成后逐条对照，任何一条不达标都会被审核打回）
+1. **核心冲突 ≥ 85 分**：冲突是否具体到"因为 A 信 X、B 信 Y 所以一定在 Z 上对撞"？是否有至少 2 层对手（显性 + 结构性）？冲突是否能撑 ${book.targetChapters} 章不塌？
+2. **开篇节奏 ≥ 80 分**：前 5 章是否有明确的"翻页驱动力"——第 1 章结尾是否有钩子让人想翻第 2 章？前 3 章是否避免了纯铺垫/设定介绍？
+3. **世界一致性 ≥ 85 分**：铁律是否互相不矛盾？世界观是否具体到感官层面（湿/干、快/慢、噪/静）？是否给 writer 提供了明确的感官锚？
+4. **角色区分度 ≥ 80 分**：主要角色是否有"反差细节"（核心标签 + 1-2 个矛盾细节）？角色的内在驱动是否各不相同（不是所有人都想"变强"）？关系网络是否是动态的而非标签？
+5. **节奏可行性 ≥ 75 分**：卷纲是否有足够变化（不是连续 10 章同一种节拍）？每卷是否有不可逆事件？节奏原则是否具体到本书（至少 3 条具体化，不是全是通用废话）？
+
+如果自审发现任何一条不达标，立即修改后再输出。
 
 === SECTION: story_frame ===
 
@@ -413,6 +422,15 @@ Do not duplicate the same fact across sections. The protagonist's arc lives only
 - roles ≤ 8000 chars total
 - book_rules ≤ 500 chars (YAML only)
 - pending_hooks ≤ 2000 chars
+
+## Self-review checklist (check each before outputting — failing any will cause rejection)
+1. **Core Conflict ≥ 85**: Is the conflict specific enough to "because A believes X, B believes Y, they will collide on Z"? Are there at least 2 opponent layers (visible + structural)? Can it sustain ${book.targetChapters} chapters?
+2. **Opening Momentum ≥ 80**: Do the first 5 chapters have a clear page-turning hook? Does Ch1 end with something that makes readers want Ch2? Do the first 3 chapters avoid pure setup/exposition?
+3. **World Coherence ≥ 85**: Are the hard rules mutually consistent? Is the world specific to sensory level (wet/dry, fast/slow, noisy/quiet)? Does it give the writer a concrete sensory anchor?
+4. **Character Differentiation ≥ 80**: Do major characters have "contrast details" (core tags + 1-2 contradictory specifics)? Are inner drives distinct (not everyone wants "to get stronger")? Are relationships dynamic, not labels?
+5. **Pacing Feasibility ≥ 75**: Does the volume outline have enough variety (not 10 chapters of the same beat)? Does each volume end with an irreversible event? Are rhythm principles concretized for this book (at least 3 specific, not all generic platitudes)?
+
+If any dimension falls short, fix it before outputting.
 
 === SECTION: story_frame ===
 
@@ -1031,7 +1049,7 @@ ${genreBody}
         role: "user",
         content: `请为标题为"${book.title}"的${fanficMode}模式同人小说生成基础设定。目标${book.targetChapters}章，每章${book.chapterWordCount}字。`,
       },
-    ], { temperature: 0.7 });
+    ], { temperature: 0.6 });
 
     return this.parseSections(response.content, book.language ?? "zh");
   }
@@ -1047,16 +1065,32 @@ ${genreBody}
     if (!trimmed) return "";
 
     if (language === "en") {
-      return `\n\n## Previous Review Feedback
-The previous foundation draft was rejected. You must explicitly fix the following issues in this regeneration instead of paraphrasing the same design:
+      return `\n\n## Previous Review Feedback — MUST FIX
+The previous foundation was REJECTED. You must explicitly address every issue below. Do NOT just rephrase the same design — change the actual substance. Focus especially on any dimension scoring below 80.
 
-${trimmed}\n`;
+${trimmed}
+
+## Fix strategy
+- For each low-scoring dimension: identify the specific weakness, then redesign that section from scratch (not just rewrite)
+- If "核心冲突" is low: sharpen the A-believes-X vs B-believes-Y collision; add a structural opponent
+- If "开篇节奏" is low: add a concrete hook at the end of chapter 1; remove pure setup from chapters 1-3
+- If "角色区分度" is low: add contrast details to each major character; make inner drives distinct
+- If "节奏可行性" is low: ensure each volume has a different emotional beat; add concrete rhythm principles
+- If "世界一致性" is low: add sensory texture; ensure hard rules don't contradict\n`;
     }
 
-    return `\n\n## 上一轮审核反馈
-上一轮基础设定未通过审核。你必须在这次重生中明确修复以下问题，不能只换措辞重写同一套方案：
+    return `\n\n## 上一轮审核反馈——必须修复
+上一轮基础设定被驳回。你必须针对以下问题做出实质性修改，不能只换措辞重写同一套方案。重点关注低于 80 分的维度。
 
-${trimmed}\n`;
+${trimmed}
+
+## 修复策略
+- 对每个低分维度：定位具体弱点，然后从头重新设计该 section（不是重写措辞）
+- 核心冲突低分：强化"A 信 X vs B 信 Y 必然在 Z 上对撞"的冲突；增加结构性对手
+- 开篇节奏低分：在第 1 章结尾加入具体钩子；前 3 章避免纯铺垫/设定介绍
+- 角色区分度低分：给每个主要角色增加反差细节；让内在驱动各不相同
+- 节奏可行性低分：确保每卷有不同的情绪节拍；节奏原则要具体到本书
+- 世界一致性低分：增加感官质感；确保铁律不互相矛盾\n`;
   }
 
   private normalizeSectionName(name: string): string {

@@ -95,7 +95,13 @@ export const createMessageSlice: StateCreator<ChatStore, [], [], MessageActions>
       }),
     })),
 
-  setSelectedModel: (model, service) => set({ selectedModel: model, selectedService: service }),
+  setSelectedModel: (model, service) => {
+    try {
+      localStorage.setItem("inkos.selected-model", model);
+      localStorage.setItem("inkos.selected-service", service);
+    } catch { /* ignore */ }
+    set({ selectedModel: model, selectedService: service });
+  },
 
   loadSessionList: async (bookId) => {
     const query = bookId === null ? "null" : encodeURIComponent(bookId);

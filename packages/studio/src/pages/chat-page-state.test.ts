@@ -128,18 +128,12 @@ describe("pickModelSelection", () => {
     expect(pickModelSelection(grouped, "kimi-k2.5", "moonshot")).toBeNull();
   });
 
-  it("selects the first available model when current selection is missing", () => {
-    expect(pickModelSelection(grouped, "gemini-3.1-flash-image-preview", "google")).toEqual({
-      model: "gemini-2.5-flash",
-      service: "google",
-    });
+  it("returns null when the selected model disappears (no auto-switch)", () => {
+    expect(pickModelSelection(grouped, "gemini-3.1-flash-image-preview", "google")).toBeNull();
   });
 
-  it("selects the first available model when there is no current selection", () => {
-    expect(pickModelSelection(grouped, null, null)).toEqual({
-      model: "gemini-2.5-flash",
-      service: "google",
-    });
+  it("never auto-picks — returns null even with no current selection", () => {
+    expect(pickModelSelection(grouped, null, null)).toBeNull();
   });
 
   it("returns null when no models are available", () => {

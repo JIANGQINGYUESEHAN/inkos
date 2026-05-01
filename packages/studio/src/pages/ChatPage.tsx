@@ -33,7 +33,6 @@ import {
 import {
   filterModelGroups,
   getBookCreateSessionId,
-  pickModelSelection,
   setBookCreateSessionId,
 } from "./chat-page-state";
 
@@ -120,14 +119,6 @@ export function ChatPage({ activeBookId, nav, theme, t, sse: _sse }: ChatPagePro
       .filter((s) => s.connected && (modelsByService[s.service]?.length ?? 0) > 0)
       .map((s) => ({ service: s.service, label: s.label, models: modelsByService[s.service]! }));
   }, [services, modelsByService]);
-
-  // Auto-select first model when models load, and replace stale selections after lists refresh.
-  useEffect(() => {
-    const nextSelection = pickModelSelection(groupedModels, selectedModel, selectedService);
-    if (nextSelection) {
-      setSelectedModel(nextSelection.model, nextSelection.service);
-    }
-  }, [groupedModels, selectedModel, selectedService, setSelectedModel]);
 
   // Auto-resize textarea
   useEffect(() => {

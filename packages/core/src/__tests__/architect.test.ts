@@ -582,7 +582,7 @@ describe("ArchitectAgent", () => {
     await agent.generateFoundation(book);
 
     const options = chatSpy.mock.calls[0]?.[1] as { temperature?: number; maxTokens?: number } | undefined;
-    expect(options).toEqual(expect.objectContaining({ temperature: 0.8 }));
+    expect(options).toEqual(expect.objectContaining({ temperature: 0.6 }));
     expect(options).not.toHaveProperty("maxTokens");
   });
 
@@ -706,7 +706,7 @@ describe("ArchitectAgent", () => {
     await agent.generateFanficFoundation(book, "正典文本", "canon");
 
     const options = chatSpy.mock.calls[0]?.[1] as { temperature?: number; maxTokens?: number } | undefined;
-    expect(options).toEqual(expect.objectContaining({ temperature: 0.7 }));
+    expect(options).toEqual(expect.objectContaining({ temperature: 0.6 }));
     expect(options).not.toHaveProperty("maxTokens");
   });
 

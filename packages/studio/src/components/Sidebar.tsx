@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useApi } from "../hooks/use-api";
 import type { SSEMessage } from "../hooks/use-sse";
 import { applyBookCollectionEvent, shouldRefetchBookCollections, shouldRefetchDaemonStatus } from "../hooks/use-book-activity";
@@ -84,23 +84,41 @@ export function Sidebar({ nav, activePage, sse, t }: {
 
   const books = data?.books ?? [];
 
+  const lastProcessedMsgIdx = useRef(-1);
+
   useEffect(() => {
-    const recent = sse.messages.at(-1);
-    if (!recent) return;
-    if (shouldRefetchBookCollections(recent)) {
-      let appliedIncrementally = false;
-      mutateBooks((current) => {
-        const updatedBooks = applyBookCollectionEvent(current?.books ?? [], recent);
-        if (!updatedBooks) return current;
-        appliedIncrementally = true;
-        return { books: updatedBooks };
-      });
-      if (appliedIncrementally) {
-        return;
+    if (sse.messages.length === 0) return;
+
+    let shouldRefetchBookList = false;
+    let shouldRefetchDaemon = false;
+
+    // Process all SSE messages since last check to avoid missing events
+    // when React batches multiple state updates.
+    for (let i = lastProcessedMsgIdx.current + 1; i < sse.messages.length; i += 1) {
+      const msg = sse.messages[i];
+      if (shouldRefetchBookCollections(msg)) {
+        let appliedIncrementally = false;
+        mutateBooks((current) => {
+          const updatedBooks = applyBookCollectionEvent(current?.books ?? [], msg);
+          if (!updatedBooks) return current;
+          appliedIncrementally = true;
+          return { books: updatedBooks };
+        });
+        if (!appliedIncrementally) {
+          shouldRefetchBookList = true;
+        }
       }
+      if (shouldRefetchDaemonStatus(msg)) {
+        shouldRefetchDaemon = true;
+      }
+    }
+
+    lastProcessedMsgIdx.current = sse.messages.length - 1;
+
+    if (shouldRefetchBookList) {
       refetchBooks();
     }
-    if (shouldRefetchDaemonStatus(recent)) {
+    if (shouldRefetchDaemon) {
       refetchDaemon();
     }
   }, [mutateBooks, refetchBooks, refetchDaemon, sse.messages]);
