@@ -2,14 +2,14 @@
 name: LitRPG
 id: litrpg
 language: en
-chapterTypes: ["Progression", "Setup", "Transition", "Payoff", "Combat"]
+chapterTypes: ["Progression", "Setup", "Transition", "Payoff", "Combat", "Buildup"]
 fatigueWords: ["delve", "tapestry", "testament", "intricate", "pivotal", "vibrant", "comprehensive", "nuanced", "embark", "foster", "underscore", "bolstered", "crucial"]
 numericalSystem: true
 powerScaling: true
 eraResearch: false
-pacingRule: "Every 1-3 chapters early: level-up or stat gain. Mid-story every 5-10 chapters. Late story: tier transitions spaced far apart."
-satisfactionTypes: ["Level Up", "Skill Unlock", "Loot Drop", "Boss Kill", "Tier Breakthrough", "System Secret Revealed"]
-auditDimensions: [1,2,3,4,5,6,7,8,9,10,13,14,15,16,17,18,19,24,25,26]
+pacingRule: "5-8 chapters per small goal cycle, 10-20 chapters per major narrative arc. Allow 3-5 chapters of pure buildup (accumulation phase). Slow-burn buildup is more valuable than dense payoff beats."
+satisfactionTypes: ["Level Up", "Skill Unlock", "Loot Drop", "Boss Kill", "Tier Breakthrough", "System Secret Revealed", "Atmospheric Elevation", "Epiphany Moment"]
+auditDimensions: [1,2,3,4,5,6,7,8,9,10,13,14,15,16,17,18,19,24,25,26,38,39,40]
 ---
 
 ## Genre Prohibitions

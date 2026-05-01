@@ -525,18 +525,32 @@ function buildGoldenChaptersRules(chapterNumber?: number, language?: string): st
 - 开篇场景限制：最多1-2个场景，最多3个角色
 - 主角身份/外貌/背景通过行动自然带出，禁止资料卡式罗列
 - 本章结束前，核心矛盾必须浮出水面
-- 一句对话能交代的信息不要用一段叙述，角色身份、性格、地位都可以从一句有特色的台词中带出`,
+- 一句对话能交代的信息不要用一段叙述，角色身份、性格、地位都可以从一句有特色的台词中带出
+
+**慢热型开篇备选**（适用于长篇玄幻、仙侠等题材）：
+- 允许前3章采用"铺垫-渐入-爆发"结构
+- 第1章可侧重意境营造和人物铺垫，但必须有悬念钩子
+- 第2章可深化世界观，但必须有小冲突或小反转
+- 第3章必须引爆主线矛盾，完成"蓄势-爆发"的节奏闭环`,
     2: `### 第二章：展现金手指/核心能力
 - 主角的核心优势（金手指/特殊能力/信息差等）必须在本章初现
 - 金手指的展现必须通过具体事件，不能只是内心独白"我获得了XX"
 - 开始建立"主角有什么不同"的读者认知
 - 第一个小爽点应在本章出现
-- 继续收紧核心冲突，不引入新支线`,
+- 继续收紧核心冲突，不引入新支线
+
+**慢热型备选**：
+- 可侧重人物关系铺垫和世界观展开
+- 但必须有至少一个"小钩子"（悬念/冲突/反转）`,
     3: `### 第三章：明确短期目标
 - 主角的第一个阶段性目标必须在本章确立
 - 目标必须具体可衡量（打败某人/获得某物/到达某处），不能是抽象的"变强"
 - 读完本章，读者应能说出"接下来主角要干什么"
-- 章尾钩子要足够强，这是读者决定是否继续追读的关键章`,
+- 章尾钩子要足够强，这是读者决定是否继续追读的关键章
+
+**慢热型备选**：
+- 如果前两章是铺垫，本章必须完成"爆发"
+- 短期目标可延后到第4-5章确立，但本章必须有明确的剧情推进`,
   };
 
   const enRules: Record<number, string> = {
@@ -545,16 +559,30 @@ function buildGoldenChaptersRules(chapterNumber?: number, language?: string): st
 - First paragraph must show a scene, not tell backstory
 - Max 1-2 locations, max 3 characters
 - Protagonist identity revealed through behavior, not info-dump
-- Core conflict must surface before chapter end`,
+- Core conflict must surface before chapter end
+
+**Slow-burn alternative** (for long-form cultivation, epic fantasy):
+- First 3 chapters may use "setup-gradual-climax" structure
+- Ch1 may focus on atmosphere and character setup, but must have a suspense hook
+- Ch2 may deepen worldbuilding, but must have a small conflict or reversal
+- Ch3 must ignite the core conflict, completing the "buildup-explosion" rhythm`,
     2: `### Chapter 2: Reveal the edge
 - The protagonist's unique advantage (power/secret/skill) must appear
 - Show it through a concrete event, not internal monologue ("I gained X")
 - First small payoff/satisfaction beat should land here
-- Tighten the core conflict, don't open new subplots`,
+- Tighten the core conflict, don't open new subplots
+
+**Slow-burn alternative**:
+- May focus on relationship building and world expansion
+- But must have at least one "small hook" (suspense/conflict/reversal)`,
     3: `### Chapter 3: Lock in the short-term goal
 - A specific, measurable goal must be established (defeat someone / obtain something / reach somewhere)
 - Reader must be able to say "I know what the protagonist wants next"
-- End with a strong hook — this is the make-or-break chapter for retention`,
+- End with a strong hook — this is the make-or-break chapter for retention
+
+**Slow-burn alternative**:
+- If first two chapters were setup, this chapter must deliver the "explosion"
+- Short-term goal may defer to ch4-5, but this chapter must have clear plot advancement`,
     4: `### Chapter 4: First major payoff
 - Deliver the first BIG satisfaction beat — reader has invested 3 chapters, reward them
 - Protagonist uses their edge to achieve something meaningful (not just survive)
@@ -573,7 +601,7 @@ function buildGoldenChaptersRules(chapterNumber?: number, language?: string): st
 
 The opening ${goldenLimit} chapters determine whether readers stay or leave. Before the paywall (ch6-8), every chapter must hook harder than the last.
 
-- Start from an explosion, not the first brick
+- Start from an explosion, not the first brick (or use slow-burn buildup for long-form genres)
 - No info-dumps: worldbuilding reveals through action
 - Each chapter: 1 storyline, max 3 characters
 - Lead with strong emotion: injustice, danger, mystery, desire`
@@ -581,7 +609,7 @@ The opening ${goldenLimit} chapters determine whether readers stay or leave. Bef
 
 开篇${goldenLimit}章决定读者是否追读。遵循以下强制规则：
 
-- 开篇不要从第一块砖头开始砌楼——从炸了一栋楼开始写
+- 开篇不要从第一块砖头开始砌楼——从炸了一栋楼开始写（长篇题材可选慢热型铺垫）
 - 禁止信息轰炸：世界观、力量体系等设定随剧情自然揭示
 - 每章聚焦1条故事线，人物数量控制在3个以内
 - 强情绪优先：利用读者共情（亲情纽带、不公待遇、被低估）快速建立代入感`;

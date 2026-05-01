@@ -2,14 +2,14 @@
 name: Progression Fantasy
 id: progression
 language: en
-chapterTypes: ["Training", "Breakthrough", "Setup", "Transition", "Payoff"]
+chapterTypes: ["Training", "Breakthrough", "Setup", "Transition", "Payoff", "Buildup"]
 fatigueWords: ["delve", "tapestry", "testament", "intricate", "pivotal", "vibrant", "comprehensive", "nuanced", "embark", "foster", "underscore", "bolstered", "crucial"]
 numericalSystem: false
 powerScaling: true
 eraResearch: false
-pacingRule: "Tier advancement every 2-4 chapters early, every 8-15 mid-story, every 20+ late-story. Each tier must feel fundamentally different."
-satisfactionTypes: ["Tier Breakthrough", "Technique Mastery", "Rival Surpassed", "Mentor Transcended", "Power Combination Discovered", "Impossible Challenge Overcome"]
-auditDimensions: [1,2,3,4,6,7,8,9,10,13,14,15,16,17,18,19,24,25,26]
+pacingRule: "5-8 chapters per small goal cycle, 10-20 chapters per major narrative arc. Allow 3-5 chapters of pure buildup (accumulation phase). Slow-burn buildup is more valuable than dense payoff beats."
+satisfactionTypes: ["Tier Breakthrough", "Technique Mastery", "Rival Surpassed", "Mentor Transcended", "Power Combination Discovered", "Impossible Challenge Overcome", "Atmospheric Elevation", "Epiphany Moment"]
+auditDimensions: [1,2,3,4,6,7,8,9,10,13,14,15,16,17,18,19,24,25,26,38,39,40]
 ---
 
 ## Genre Prohibitions
