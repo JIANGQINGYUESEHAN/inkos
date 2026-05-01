@@ -19,19 +19,92 @@ interface LedgerSection {
 }
 
 function parseParticleLedger(md: string): LedgerSection[] {
-  const sections: LedgerSection[] = [];
-  const parts = md.split(/^## /m).slice(1);
+  // Try format A: ## 陈东储物袋 / ## 他人之物 (our manual format)
+  const partsA = md.split(/^## /m).slice(1);
+  if (partsA.length > 0) {
+    const sections: LedgerSection[] = [];
+    for (const part of partsA) {
+      const lines = part.split("\n");
+      const title = lines[0].trim();
+      if (!title || title.includes("数值体系") || title.includes("结束时")) continue;
 
-  for (const part of parts) {
-    const lines = part.split("\n");
-    const title = lines[0].trim();
-    if (!title || title === "数值体系") continue;
+      const body = lines.slice(1).join("\n");
+      const categories = parseCategories(body);
+      if (categories.length > 0) {
+        sections.push({ title, icon: null, categories });
+      }
+    }
+    if (sections.length > 0) return sections;
+  }
+
+  // Format B: system pipeline format — ## {chapter}结束时 → ### section → #### category
+  // Build sections from ### level
+  const sections: LedgerSection[] = [];
+  const knownSections: Record<string, LedgerCategory[]> = {};
+
+  // First pass: collect all ### sections
+  const subSections = md.split(/^### /m).slice(1);
+  for (const sub of subSections) {
+    const lines = sub.split("\n");
+    const sectionName = lines[0].trim();
+    if (!sectionName) continue;
 
     const body = lines.slice(1).join("\n");
-    const categories = parseCategories(body);
-    if (categories.length > 0) {
-      sections.push({ title, icon: null, categories });
+    // Parse #### level categories
+    const cats = body.split(/^#### /m).slice(1);
+    if (cats.length > 0) {
+      const categories: LedgerCategory[] = [];
+      for (const cat of cats) {
+        const clines = cat.split("\n");
+        const catName = clines[0].trim();
+        if (!catName) continue;
+        const tableStart = clines.findIndex((l) => l.startsWith("|"));
+        if (tableStart === -1) continue;
+        const headerLine = clines[tableStart] ?? "";
+        const headers = headerLine.split("|").map((h) => h.trim()).filter(Boolean);
+        const rows: string[][] = [];
+        for (let i = tableStart + 2; i < clines.length; i++) {
+          const line = clines[i].trim();
+          if (!line.startsWith("|")) break;
+          const cells = line.split("|").map((c) => c.trim()).filter(Boolean);
+          if (cells.length === 0) continue;
+          rows.push(cells);
+        }
+        categories.push({ name: catName, icon: null, headers, rows });
+      }
+      if (categories.length > 0) {
+        knownSections[sectionName] = categories;
+      }
     }
+  }
+
+  // Group into our card structure
+  // 主角 card
+  const protagonistCats: LedgerCategory[] = [];
+  if (knownSections["陈东储物袋"]) {
+    protagonistCats.push(...(knownSections["陈东储物袋"] ?? []));
+  }
+  if (knownSections["陈东见闻录"]) {
+    protagonistCats.push(...(knownSections["陈东见闻录"] ?? []));
+  }
+  if (protagonistCats.length > 0) {
+    sections.push({ title: "主角 · 储物袋 & 见闻录", icon: null, categories: protagonistCats });
+  }
+
+  // 他人之物 card
+  if (knownSections["他人之物"]) {
+    sections.push({ title: "他人之物", icon: null, categories: knownSections["他人之物"] ?? [] });
+  }
+
+  // 宗门资源 card
+  const sectCats: LedgerCategory[] = [];
+  if (knownSections["宗门资源"]) sectCats.push(...(knownSections["宗门资源"] ?? []));
+  if (knownSections["宗门资源（临仙宗）"]) sectCats.push(...(knownSections["宗门资源（临仙宗）"] ?? []));
+  if (sectCats.length > 0) sections.push({ title: "宗门资源", icon: null, categories: sectCats });
+
+  // 世界资源 card
+  if (knownSections["世界资源"]) {
+    sections.push({ title: "世界资源", icon: null, categories: knownSections["世界资源"] ?? [] });
   }
 
   return sections;
@@ -154,8 +227,6 @@ function LedgerCategoryCard({ cat }: { readonly cat: LedgerCategory }) {
   );
 }
 
-const PROTAGONIST_SECTIONS = new Set(["陈东储物袋", "陈东见闻录"]);
-
 interface StorageBagSectionProps {
   readonly bookId: string;
 }
@@ -178,29 +249,10 @@ export function StorageBagSection({ bookId }: StorageBagSectionProps) {
 
   if (sections.length === 0) return null;
 
-  const protagonist = sections.filter((s) => PROTAGONIST_SECTIONS.has(s.title));
-  const others = sections.filter((s) => !PROTAGONIST_SECTIONS.has(s.title));
-
   return (
     <>
-      {protagonist.length > 0 && (
-        <SidebarCard title="主角" icon={<Package size={14} className="text-amber-400" />}>
-          <div className="space-y-1.5">
-            {protagonist.map((section) => (
-              <div key={section.title} className="mb-2 last:mb-0">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1 px-1">
-                  {section.title}
-                </div>
-                {section.categories.map((cat) => (
-                  <LedgerCategoryCard key={cat.name} cat={cat} />
-                ))}
-              </div>
-            ))}
-          </div>
-        </SidebarCard>
-      )}
-      {others.map((section) => (
-        <SidebarCard key={section.title} title={section.title} icon={<Building2 size={14} className="text-blue-400" />}>
+      {sections.map((section) => (
+        <SidebarCard key={section.title} title={section.title} icon={section.title.includes("主角") ? <Package size={14} className="text-amber-400" /> : <Building2 size={14} className="text-blue-400" />}>
           <div className="space-y-1.5">
             {section.categories.map((cat) => (
               <LedgerCategoryCard key={cat.name} cat={cat} />

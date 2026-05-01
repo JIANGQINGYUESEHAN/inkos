@@ -1710,6 +1710,13 @@ export class PipelineRunner {
       status: resolvedStatus,
     });
 
+    // 7. Sync world ledger (non-protagonist items, sect, world)
+    await this.syncWorldLedger(bookId, bookDir, chapterNumber, finalContent, stageLanguage)
+      .catch((err) => this.logWarn(stageLanguage, {
+        zh: `世界账本同步失败：${err instanceof Error ? err.message : String(err)}`,
+        en: `World ledger sync failed: ${err instanceof Error ? err.message : String(err)}`,
+      }));
+
     return {
       chapterNumber,
       title: persistenceOutput.title,
@@ -3204,5 +3211,74 @@ ${matrix}`,
     const lines = raw.split("\n");
     const contentStart = lines.findIndex((l, i) => i > 0 && l.trim().length > 0);
     return contentStart >= 0 ? lines.slice(contentStart).join("\n") : raw;
+  }
+
+  /**
+   * Sync world_ledger.md with new information from each chapter.
+   * Extracts: others' items, sect resources, world lore, maps.
+   * Merged cumulatively — only adds new entries, never removes old ones.
+   */
+  private async syncWorldLedger(
+    bookId: string,
+    bookDir: string,
+    chapterNumber: number,
+    chapterContent: string,
+    language: LengthLanguage,
+  ): Promise<void> {
+    const worldLedgerPath = join(bookDir, "story", "world_ledger.md");
+    const existing = await readFile(worldLedgerPath, "utf-8").catch(() => "");
+
+    const prompt = language === "zh"
+      ? `你是一位小说数据管理员。阅读本章正文，从"非主角"角度提取以下信息，只提取正文中明确出现的内容：
+
+1. 他人之物：其他角色持有的物品/功法/丹药（林寒、方明或其他角色）。只记录"持有者+物品名+来源章节"，不要编造。
+2. 宗门资源：正文中出现的宗门设施、功法、人物、阵法。只记录新出现的或信息有更新的。
+3. 世界资源：正文中出现的地图、灵脉、秘境、城镇、地名。只记录新出现的。
+
+输出格式：与下面的"现有账本"完全相同的 Markdown 格式，在现有基础上追加新条目（不要输出已有条目）。如果本章没有任何新信息，输出 NO_UPDATES。
+
+=== 现有账本 ===
+${existing || "(空)"}
+
+=== 本章正文（前2000字） ===
+${chapterContent.slice(0, 2000)}`
+      : `You are a data clerk for a novel. Read this chapter and extract non-protagonist information. Only extract what explicitly appears in the text:
+
+1. Others' Items: items/techniques/pills held by other characters (Lin Han, Fang Ming, etc.). Format: owner + item name + chapter source.
+2. Sect Resources: sect facilities, personnel, formations mentioned. Only new or updated info.
+3. World Resources: maps, spirit veins, secret realms, locations. Only new discoveries.
+
+Output in the SAME Markdown format as the existing ledger below. Append new entries only — don't repeat existing ones. If nothing new, output NO_UPDATES.
+
+=== Existing Ledger ===
+${existing || "(empty)"}
+
+=== Chapter Content (first 2000 chars) ===
+${chapterContent.slice(0, 2000)}`;
+
+    try {
+      const response = await chatCompletion(
+        this.agentCtxFor("auditor", bookId).client,
+        this.agentCtxFor("auditor", bookId).model,
+        [
+          { role: "system", content: prompt },
+        ],
+        { temperature: 0.3, maxTokens: 2000 },
+      );
+
+      const updates = response.content.trim();
+      if (!updates || updates === "NO_UPDATES") return;
+
+      // Merge: append new content after existing
+      const merged = existing.trim()
+        ? `${existing.trim()}\n\n${updates}`
+        : updates;
+
+      await writeFile(worldLedgerPath, merged, "utf-8");
+      this.config.logger?.info(`[world_ledger] Chapter ${chapterNumber}: updated with new entries.`);
+    } catch (err) {
+      // Non-critical — don't fail the pipeline
+      this.config.logger?.warn(`[world_ledger] Chapter ${chapterNumber}: sync failed — ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 }

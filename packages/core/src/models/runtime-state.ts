@@ -46,6 +46,10 @@ export const HookRecordSchema = z.object({
   // ledgers; architect-seed and consolidator-rerun both populate it going
   // forward. Reviewer uses it to gate critical severity for stale hooks.
   promoted: z.boolean().optional(),
+  // Phase 10 — reader expectation pressure (1-10).
+  // Assessed by auditor: how much is the reader waiting for this hook's payoff?
+  // >= 8 triggers planner提醒 (must be advanced or resolved within 3 chapters).
+  readerPressure: z.number().int().min(1).max(10).optional(),
 });
 
 export type HookRecord = z.infer<typeof HookRecordSchema>;

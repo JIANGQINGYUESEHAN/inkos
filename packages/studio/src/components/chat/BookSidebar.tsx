@@ -13,6 +13,7 @@ import { SummarySection } from "../sidebar/SummarySection";
 import { ChaptersSection } from "../sidebar/ChaptersSection";
 import { CharacterSection } from "../sidebar/CharacterSection";
 import { StorageBagSection } from "../sidebar/StorageBagSection";
+import { WorldLedgerSection } from "../sidebar/WorldLedgerSection";
 import { WritingPreview } from "../sidebar/WritingPreview";
 
 export interface BookSidebarProps {
@@ -199,6 +200,7 @@ function PanelView({ bookId, theme: _theme, t, sse }: BookSidebarProps) {
       <ChaptersSection bookId={bookId} isZh={isZh} />
       <CharacterSection bookId={bookId} />
       <StorageBagSection bookId={bookId} />
+      <WorldLedgerSection bookId={bookId} />
       <FoundationSection bookId={bookId} />
       <SummarySection bookId={bookId} />
     </div>
