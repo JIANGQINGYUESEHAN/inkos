@@ -13,6 +13,7 @@ const FOUNDATION_FILES: ReadonlyArray<{ file: string; label: string }> = [
   { file: "subplot_board.md", label: "支线进度" },
   { file: "emotional_arcs.md", label: "感情线" },
   { file: "character_matrix.md", label: "角色矩阵" },
+  { file: "particle_ledger.md", label: "资源账本" },
 ];
 
 interface TruthFileInfo {

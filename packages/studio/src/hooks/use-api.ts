@@ -186,3 +186,11 @@ export async function putApi<T>(path: string, body?: unknown): Promise<T> {
   invalidateApiPaths(deriveInvalidationPaths(path));
   return result;
 }
+
+export async function deleteApi<T>(path: string): Promise<T> {
+  const result = await fetchJson<T>(path, {
+    method: "DELETE",
+  });
+  invalidateApiPaths(deriveInvalidationPaths(path));
+  return result;
+}
