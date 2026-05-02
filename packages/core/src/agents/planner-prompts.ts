@@ -92,6 +92,11 @@ resolve:
 defer:
 - H009 "守拙诀来历" → 本章不动，理由：时机不到，等到第 N 章
 
+mood:
+- <可选：本章需要累积的 1-2 个情绪张力方向。情绪钩子不追求具体兑现，追求"读者感受到某种东西在蓄积但说不清是什么"。格式：[角色/场景] → [情绪方向]，如"陈东→隐忍中暗生决断"、"灵田地下→静谧中透着不安">
+  - 情绪钩子的锚点：一个具体的画面、动作或感官细节，承载情绪张力（如"周叔递旧布时，布的粗糙纹理还留在陈东掌心"）
+  - 情绪钩子不需要 hook_id，不进入账本——它们是留白的载体，不是待回收的义务
+
 **硬规则**：
 - 输入的 pending_hooks 里如果有任何 hook 状态已是 "pressured" 或 "near_payoff" 且距上次推进 ≥ 5 章，**必须**放到 advance 或 resolve，不允许 defer
 - advance/resolve 里写的 hook_id 必须真实存在于 pending_hooks 输入中（不要编造 ID）
@@ -100,6 +105,31 @@ defer:
 
 ## 不要做
 <2-4 条硬约束>
+
+## 留白处理
+<可选段。如果本章是松弛章（消化章/留白章/意境章）或存在"写出来就轻了"的瞬间，在此声明留白策略。
+格式：
+- 留白目标：<本章有意不写明的 1-2 个东西——可以是主角的内心判断、环境的暗示、关系的微妙位移>
+- 交付方式：<不写出来，通过什么暗示传达？一个动作、一处景物描写、某角色的反常反应>
+- 审计豁免：<写明哪些维度本章暂不适用，如"爽点虚化检查——本章为消化章，不适用">
+
+如果本章不需要留白处理，写"不适用"，写手将在正常审计标准下完成本章。>
+
+## 大纲对齐（阶梯约束—随章节数逐级收紧）
+
+输入中提供了当前卷纲段落和本章的约束等级。约束等级由章节数自动计算，300章为一阶：
+
+| 章节范围 | 等级 | 大纲约束强度 |
+|----------|------|-------------|
+| 1-300 | L1 引导期 | 大纲是参考，核心事件优先但允许较大弹性。偏离后5章内回到主线即可。支线可占30%内容 |
+| 301-600 | L2 稳定期 | 大纲是锚点，核心事件不可跳过。偏离后3章内必须回到主线。支线不超过20% |
+| 601-900 | L3 收紧期 | 大纲是硬框架，核心事件和阶段转折点不可偏离。偏离后下章必须补救。每条支线必须在10章内回收 |
+| 901-1200 | L4 高压期 | 大纲是施工图，卷尾必须发生的核心事件不可有任何偏离。支线仅限于为已有伏笔服务。偏离立刻标记为 critical 级别 |
+| 1201-1500 | L5 收束期 | 大纲是铁律。所有未回收伏笔必须有明确回收路径。不允许新开伏笔。每个场景必须直接推进终局方向 |
+
+当前章节处于第 {{chapterNumber}} 章，约束等级为 {{outlineTier}}。
+
+你的 memo 必须在以上等级对应的约束强度内规划本章。等级越高，你对大纲的服从性越严格。
 
 ## 输出要求
 
@@ -127,9 +157,9 @@ Your working principles (internalize them — do not cite by number in the memo)
 3. Everything is bait: in slow / transitional chapters every beat must be a future foreshadow or hook.
 4. No persona collapse: character behavior is driven by past experience + current interest + personality core. Never let antagonists suddenly turn dumb or the protagonist suddenly turn saintly.
 5. 1 mainline + 1 subplot: subplots must serve the mainline; never run 3+ subplots concurrently.
-6. Dense satisfaction beats: every 3-5 chapters needs a small payoff (small conflict → fast resolution → strong reader feedback); everyone stays sharp.
-7. Pre-climax setup: 3-5 chapters before any big climax must seed clear setups.
-8. Post-climax fallout: 1-2 chapters after a peak must show concrete change (mainline advance, persona growth, relationship shift).
+6. Satisfaction rhythm: small payoffs can land in 3-5 chapters, big payoffs need 10-20 chapters of setup. Don't sacrifice narrative depth for payoff density
+7. Pre-climax setup: 5-8 chapters before any big climax must seed clear setups, so readers feel "ah, of course" when it lands
+8. Post-climax fallout: 2-3 chapters after a peak must show concrete change (mainline advance, persona growth, relationship shift). Don't rush into the next buildup
 9. Three-dimensional characters: core tag + contrast detail = a living person.
 10. Five-sense concretization: scene description must include specific, visualizable sensory detail.
 11. Hook-passing: every chapter ends with a hook for the next.
@@ -205,6 +235,11 @@ resolve:
 defer:
 - H009 "origin of Shou-Zhuo Jue" → not touched this chapter, reason: timing not right, save until chapter N
 
+mood:
+- <Optional: 1-2 emotional-tension directions to accumulate this chapter. Mood hooks do not target concrete payoff — they aim to make the reader feel "something is building, but I can't quite name it." Format: [character/scene] → [emotional direction], e.g. "Chen Dong → resolve hardening beneath restraint", "the field beneath → quiet unease">
+  - Mood hook anchor: a concrete image, gesture, or sensory detail that carries the tension (e.g. "the rough texture of Old Zhou's cloth still tingles in Chen Dong's palm")
+  - Mood hooks do not get hook_ids and do not enter the ledger — they are carriers of leave-white, not obligations to pay off
+
 **Hard rules**:
 - If any hook in input pending_hooks is already "pressured" or "near_payoff" AND has not advanced in ≥ 5 chapters, it **must** go into advance or resolve — deferring is not allowed.
 - hook_ids in advance/resolve must exist in the input pending_hooks (do not fabricate IDs).
@@ -213,6 +248,31 @@ defer:
 
 ## Do not
 <2-4 hard prohibitions>
+
+## Leave-White Treatment
+<Optional section. If this chapter is a relaxation chapter (digestion / deliberate-emptiness / atmosphere) or contains moments where "to write it directly would lessen its weight", declare your leave-white strategy here.
+Format:
+- Leave-white goal: <1-2 things this chapter deliberately does NOT state explicitly — e.g., the protagonist's inner judgment, an environmental hint, a subtle relational shift>
+- Delivery method: <how is it implied without being stated? A single gesture, a piece of scenery description, an abnormal reaction from a side character>
+- Audit exemption: <list which dimensions should be skipped for this chapter, e.g. "payoff dilution — this is a digestion chapter, not applicable">
+
+If this chapter does not need leave-white treatment, write "n/a" and the writer will work under standard audit standards.>
+
+## Outline alignment (tiered constraint — tightens every 300 chapters)
+
+The input provides the current volume outline section and this chapter's constraint tier. Tier is computed automatically by chapter count:
+
+| Range | Tier | Constraint strength |
+|-------|------|-------------------|
+| 1-300 | L1 Guidance | Outline is a reference. Core events prioritized but flexible. Return to mainline within 5 chapters if drifted. Subplots ≤30% |
+| 301-600 | L2 Stability | Outline is an anchor. Core events must not be skipped. Return within 3 chapters. Subplots ≤20% |
+| 601-900 | L3 Tightening | Outline is a hard framework. Milestone events must not deviate. Next-chapter remediation required if drifted. All subplots must resolve within 10 chapters |
+| 901-1200 | L4 Pressure | Outline is the blueprint. Volume-end must-happen events are immutable. Subplots only for existing hooks. Deviation → critical |
+| 1201-1500 | L5 Convergence | Outline is iron law. All open hooks must have explicit resolution paths. No new hooks allowed. Every scene must advance endgame direction |
+
+Your current chapter is {{chapterNumber}}, tier {{outlineTier}}.
+
+Your memo must operate within the constraint level above. Higher tier = stricter outline compliance.
 
 ## Output requirements
 
@@ -261,9 +321,15 @@ Produce the memo for chapter {{chapterNumber}}. Strictly emit YAML frontmatter +
 
 /**
  * Phase hotfix 4: select the language-appropriate planner system prompt.
+ * The system prompt now includes tier-specific outline constraints.
  */
-export function getPlannerMemoSystemPrompt(language: "zh" | "en" = "zh"): string {
-  return language === "en" ? PLANNER_MEMO_SYSTEM_PROMPT_EN : PLANNER_MEMO_SYSTEM_PROMPT;
+export function getPlannerMemoSystemPrompt(language: "zh" | "en" = "zh", chapterNumber?: number): string {
+  const prompt = language === "en" ? PLANNER_MEMO_SYSTEM_PROMPT_EN : PLANNER_MEMO_SYSTEM_PROMPT;
+  if (chapterNumber === undefined) return prompt;
+  const tier = computeOutlineTier(chapterNumber);
+  return prompt
+    .replaceAll("{{chapterNumber}}", String(chapterNumber))
+    .replaceAll("{{outlineTier}}", tier.label);
 }
 
 export function getPlannerMemoUserTemplate(language: "zh" | "en" = "zh"): string {
@@ -345,6 +411,22 @@ export function buildPlannerUserMessage(input: PlannerUserMessageInput): string 
 
   const golden = buildGoldenOpeningGuidance(input.chapterNumber, language);
   return golden ? `${filled}\n\n${golden}` : filled;
+}
+
+/**
+ * Compute outline constraint tier based on chapter count.
+ * 300 chapters per tier, 5 tiers total.
+ */
+export function computeOutlineTier(chapterNumber: number): { level: string; label: string } {
+  const tier = Math.min(5, Math.ceil(chapterNumber / 300));
+  const labels: Record<number, string> = {
+    1: "L1 引导期",
+    2: "L2 稳定期",
+    3: "L3 收紧期",
+    4: "L4 高压期",
+    5: "L5 收束期",
+  };
+  return { level: `L${tier}`, label: labels[tier] ?? `L${tier}` };
 }
 
 /**

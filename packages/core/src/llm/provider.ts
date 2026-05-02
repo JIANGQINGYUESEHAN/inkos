@@ -688,7 +688,11 @@ async function chatCompletionViaCustomOpenAICompatible(
 
     try {
       while (true) {
-        const { value, done } = await reader.read();
+        const readPromise = reader.read();
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Stream read timeout — no data received for 120s")), 120_000),
+        );
+        const { value, done } = await Promise.race([readPromise, timeoutPromise]);
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         const parsed = parseSseEvents(buffer);
@@ -772,28 +776,42 @@ async function chatCompletionViaCustomOpenAICompatible(
   let content = "";
   let usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
+  // Stream read timeout: if no data in 120s, the connection is dead
+  const STREAM_READ_TIMEOUT_MS = 120_000;
+  let lastChunkTime = Date.now();
+
   try {
     while (true) {
-      const { value, done } = await reader.read();
+      const readPromise = reader.read();
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Stream read timeout — no data received for 120s")), STREAM_READ_TIMEOUT_MS),
+      );
+
+      const { value, done } = await Promise.race([readPromise, timeoutPromise]);
       if (done) break;
+      lastChunkTime = Date.now();
       buffer += decoder.decode(value, { stream: true });
       const parsed = parseSseEvents(buffer);
       buffer = parsed.rest;
       for (const event of parsed.events) {
         if (!event.data || event.data === "[DONE]") continue;
-        const json = JSON.parse(event.data);
-        const delta = json?.choices?.[0]?.delta?.content;
-        if (typeof delta === "string") {
-          content += delta;
-          monitor.onChunk(delta);
-          onTextDelta?.(delta);
-        }
-        if (json?.usage) {
-          usage = {
-            promptTokens: json.usage.prompt_tokens ?? usage.promptTokens,
-            completionTokens: json.usage.completion_tokens ?? usage.completionTokens,
-            totalTokens: json.usage.total_tokens ?? usage.totalTokens,
-          };
+        try {
+          const json = JSON.parse(event.data);
+          const delta = json?.choices?.[0]?.delta?.content;
+          if (typeof delta === "string") {
+            content += delta;
+            monitor.onChunk(delta);
+            onTextDelta?.(delta);
+          }
+          if (json?.usage) {
+            usage = {
+              promptTokens: json.usage.prompt_tokens ?? usage.promptTokens,
+              completionTokens: json.usage.completion_tokens ?? usage.completionTokens,
+              totalTokens: json.usage.total_tokens ?? usage.totalTokens,
+            };
+          }
+        } catch {
+          // Skip malformed SSE events
         }
       }
     }
@@ -835,21 +853,51 @@ export async function chatCompletion(
   const onTextDelta = options?.onTextDelta;
   const errorCtx = { baseUrl: client._piModel?.baseUrl ?? "(unknown)", model };
 
-  try {
-    if (shouldUseNativeCustomTransport(client)) {
-      return await chatCompletionViaCustomOpenAICompatible(client, model, messages, resolved, onStreamProgress, onTextDelta);
+  const maxRetries = 2;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (shouldUseNativeCustomTransport(client)) {
+        return await chatCompletionViaCustomOpenAICompatible(client, model, messages, resolved, onStreamProgress, onTextDelta);
+      }
+      return await chatCompletionViaPiAi(client, model, messages, resolved, onStreamProgress, onTextDelta);
+    } catch (error) {
+      lastError = error;
+
+      // Stream interrupted but partial content is usable — return truncated response
+      if (error instanceof PartialResponseError) {
+        return {
+          content: error.partialContent,
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+        };
+      }
+
+      // Network errors — retry with delay (empty response, connection reset, terminated)
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const causeMsg = (error as Record<string, unknown>)?.cause instanceof Error
+        ? ((error as Record<string, { message: string }>).cause.message)
+        : "";
+      const isEmptyResponse = errorMsg.includes("empty response") || errorMsg.includes("empty");
+      const isNetworkError = errorMsg.includes("ECONNRESET")
+        || errorMsg.includes("terminated")
+        || errorMsg.includes("Connection reset")
+        || errorMsg.includes("read ECONNRESET")
+        || causeMsg.includes("ECONNRESET")
+        || errorMsg.includes("timeout");
+      const isAborted = errorMsg.includes("aborted") || errorMsg.includes("abort");
+
+      if ((isEmptyResponse || isNetworkError) && !isAborted && attempt < maxRetries) {
+        const delayMs = (attempt + 1) * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        continue;
+      }
+
+      throw wrapLLMError(error, errorCtx);
     }
-    return await chatCompletionViaPiAi(client, model, messages, resolved, onStreamProgress, onTextDelta);
-  } catch (error) {
-    // Stream interrupted but partial content is usable — return truncated response
-    if (error instanceof PartialResponseError) {
-      return {
-        content: error.partialContent,
-        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      };
-    }
-    throw wrapLLMError(error, errorCtx);
   }
+
+  throw wrapLLMError(lastError, errorCtx);
 }
 
 // === Tool-calling Chat (used by agent loop) ===

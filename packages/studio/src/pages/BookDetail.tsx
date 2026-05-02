@@ -76,7 +76,12 @@ const STATUS_CONFIG: Record<string, { color: string; icon: React.ReactNode }> = 
   "ready-for-review": { color: "text-amber-500 bg-amber-500/10", icon: <Eye size={12} /> },
   approved: { color: "text-emerald-500 bg-emerald-500/10", icon: <Check size={12} /> },
   drafted: { color: "text-muted-foreground bg-muted/20", icon: <FileText size={12} /> },
+  draft: { color: "text-muted-foreground bg-muted/20", icon: <FileText size={12} /> },
+  review: { color: "text-amber-500 bg-amber-500/10", icon: <Eye size={12} /> },
   "needs-revision": { color: "text-destructive bg-destructive/10", icon: <RotateCcw size={12} /> },
+  "audit-failed": { color: "text-destructive bg-destructive/10", icon: <X size={12} /> },
+  "audit-passed": { color: "text-emerald-500 bg-emerald-500/10", icon: <Check size={12} /> },
+  "state-degraded": { color: "text-orange-500 bg-orange-500/10", icon: <RotateCcw size={12} /> },
   imported: { color: "text-blue-500 bg-blue-500/10", icon: <Download size={12} /> },
 };
 

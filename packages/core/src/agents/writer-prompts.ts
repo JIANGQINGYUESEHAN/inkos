@@ -237,7 +237,7 @@ function buildCoreRules(lengthSpec: LengthSpec): string {
 
 ## 硬性禁令
 
-- 【禁令】"不是……而是……""不是……，是……"句式仅限关键认知翻转场景使用，同章最多1次，且必须用于推动读者对已发生事件的理解质变——禁止用此句式做简单对比
+- 【禁令】"不是……而是……""不是……，是……"句式仅限关键认知翻转场景使用，同章最多1次，且必须用于推动读者对已发生事件的理解质变——禁止用此句式做简单对比。例外：用于揭示"道"之本质或世界观底层规则（如"道不在天，在脚下""灵气不是从天上来的，是从地下渗上来的"），此类格局揭示不受次数限制，但需用在真正有分量的地方
 - 正文中禁止出现hook_id/账本式数据（如"余量由X%降到Y%"），数值结算只放POST_SETTLEMENT`;
 }
 
@@ -421,6 +421,7 @@ function buildWritingCraftCard(language: "zh" | "en"): string {
 - **Emotion**: Externalize through action — never write "he felt angry", write "he crushed the teacup"
 - **Salt in soup**: Values conveyed through behavior, not slogans
 - **Supporting cast**: Every side character has their own agenda. Protagonist wins by outsmarting smart people, not crushing fools
+- **Original imagery**: Every chapter must deliver at least 1-2 unforgettable images — not "the spiritual energy was dense", but "the spiritual energy was viscous as human blood, oozing from the crevices in the stone." Don't recycle the same image domain; new scenes demand new metaphors. A great image makes the reader remember not the plot point, but the hot stone slab and the faint grey threads on it
 - **Five senses**: Wet shirt sticking to the back, hospital disinfectant smell, rain puddles at the bus stop
 - **Concrete**: Don't write "a big city" — write "the back seat of a taxi stuck in traffic for forty minutes"
 - **Sentence craft**: Avoid "although...however" / "nevertheless" / excessive "was". Use character reactions instead of transition words
@@ -440,6 +441,7 @@ function buildWritingCraftCard(language: "zh" | "en"): string {
 - **情绪**：用动作外化，不写"他感到愤怒"，写"他捏碎了茶杯，滚烫的茶水流过指缝"
 - **盐溶于汤**：价值观通过行为传达，不喊口号
 - **配角**：有自己的算盘和反击，主角压服聪明人不是碾压傻子
+- **原创意象**：每章至少给出 1-2 个出不去的画面——不是"灵气浓郁"，而是"灵气像人血一样黏稠，从石壁的裂缝里渗出来"。避免在同一个意象域内打转，新场景用新比喻。好的画面让读者记住的不是情节，是那块发烫的石板和石板上若有若无的灰色细丝
 - **五感**：潮湿的短袖黏在后背上、医院消毒水的味、雨天公交站的积水
 - **具体化**：不写"大城市"，写"三环堵了四十分钟的出租车后座"
 - **句式**：少用"虽然但是/然而/因此/了"，用角色内心吐槽替代转折词
@@ -470,7 +472,29 @@ Show don't tell: stack real detail to make truth visible, never deliver feeling 
 
 这十五条原则是你写作的脊梁。内化它们——绝不引用、绝不列表、绝不在正文里复述。它们的用途是帮你在"两个都说得通的下一句"之间做出选择。
 
-Show don't tell，用细节堆出真实，禁止用一行直白陈述替代情绪。价值观要像盐溶于汤——角色的信念靠"没人看时他在做什么"来证明，不靠口号。任何角色的任何行动都必须同时立于三条腿上：过往经历、当前利益、性格底色；缺一条就成了作者强行安排。每个配角都有自己的账本和利益诉求，他们在遇到主角之前就存在、在离开主角之后继续过日子，不是工具人。节奏即呼吸——慢火才能炖出高汤，日常当饵用，不是填充。每章结尾必须有小悬念或情绪缺口，把读者钉在下一章。全员智商在线——禁止降智、圣母心、无铺垫的妥协。沉默与留白同样是叙述武器：有些答案不需要写出来，读者自己推导出的理解比任何总结句都有力；陈东这类内敛角色，他的不说话比他的任何语言都更能塑造他。后世梗用符合年代语境的说法落地。时间线与时代常识不能错。日常场景的七成必须在后面成为主线伏笔。任何关系的改变都要事件驱动——没有一夜称兄道弟、没有莫名其妙的深情。人设前后一致，成长有过程。重要剧情和伏笔用场景，不用总结。拒绝流水账——每一行字要么推动剧情，要么塑造人物。`;
+Show don't tell，用细节堆出真实，禁止用一行直白陈述替代情绪。价值观要像盐溶于汤——角色的信念靠"没人看时他在做什么"来证明，不靠口号。任何角色的任何行动都必须同时立于三条腿上：过往经历、当前利益、性格底色；缺一条就成了作者强行安排。每个配角都有自己的账本和利益诉求，他们在遇到主角之前就存在、在离开主角之后继续过日子，不是工具人。节奏即呼吸——慢火才能炖出高汤，日常当饵用，不是填充。每章结尾必须有小悬念或情绪缺口，把读者钉在下一章。全员智商在线——禁止降智、圣母心、无铺垫的妥协。沉默与留白同样是叙述武器：有些答案不需要写出来，读者自己推导出的理解比任何总结句都有力；陈东这类内敛角色，他的不说话比他的任何语言都更能塑造他。后世梗用符合年代语境的说法落地。时间线与时代常识不能错。日常场景的七成必须在后面成为主线伏笔。任何关系的改变都要事件驱动——没有一夜称兄道弟、没有莫名其妙的深情。人设前后一致，成长有过程。重要剧情和伏笔用场景，不用总结。拒绝流水账——每一行字要么推动剧情，要么塑造人物。
+
+## 松弛章通识
+
+并非所有章节都需要密集事件。以下章节类型为"松弛章"，写作时主动放慢叙事呼吸，不追求信息密度：
+
+- **消化章**：前文有重大转折/爆发后，主角需要消化吸收。此类章节写"静"——静坐、内视、与内心对话。允许纯意境无推进。
+- **留白章**：有些东西不需要写出来。主角的内心变化、对未来的担忧或决心，通过"什么都不做"来传达——一个动作、一个停顿、一个眼神，胜过千字旁白。读者自己脑补最有力。
+- **意境章**：以氛围和感官体验为核心。写雨、写夜、写山风——这些不是"填充"，是情感载体。环境本身就是角色内心的投射。
+
+松弛章不等于水章。松弛章的每一笔依然有意义，但这种意义不在"情节推进"，而在"情绪累积"和"意境沉淀"。钩子可以压住不发，冲突可以暂时停悬，节奏可以拉长到让读者屏住呼吸的程度。
+
+## 神来之笔通孔
+
+chapter_memo 是规划，不是牢笼。如果你在写作过程中——写到了某个角色、某个场景、某个瞬间——**直觉告诉你这里有一条比 memo 更对的路**，你可以走。但你必须做三件事：
+
+1. 在 PRE_WRITE_CHECK 的「风险扫描」栏显式标注"神来之笔：原memo计划X，实际走Y，理由是Z"
+2. 确保这一笔不破坏人物一致性（过往经历+利益+底色三问仍须通过）
+3. 在 POST_SETTLEMENT 中说明这条偏离对新伏笔/新线索的影响
+
+神来之笔不是偷懒通道——它必须是"偶然撞见的更好东西"，不是"不想按memo写的借口"。判断标准只有一条：如果这一笔让读者在合上页面后，角色还在他们脑子里，那就对。
+
+如果你连续两章使用神来之笔偏离 memo，第三笔必须回到 memo。偶尔的灵光一现有力量，频繁偏离就是没有规划。`;
 }
 
 // ---------------------------------------------------------------------------

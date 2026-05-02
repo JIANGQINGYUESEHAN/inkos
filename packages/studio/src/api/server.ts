@@ -1050,6 +1050,25 @@ export function createStudioServer(initialConfig: ProjectConfig, root: string) {
     }
   });
 
+  app.put("/api/v1/books/:id/truth/:file{.+}", async (c) => {
+    const file = c.req.param("file");
+    const id = c.req.param("id");
+    const { content } = await c.req.json<{ content: string }>();
+
+    const bookDir = state.bookDir(id);
+    const resolved = resolveTruthFilePath(bookDir, file);
+    if (!resolved) {
+      return c.json({ error: "Invalid truth file" }, 400);
+    }
+
+    try {
+      await writeFile(resolved, content, "utf-8");
+      return c.json({ ok: true, file });
+    } catch (e) {
+      return c.json({ error: String(e) }, 500);
+    }
+  });
+
   // --- Analytics ---
 
   app.get("/api/v1/books/:id/analytics", async (c) => {

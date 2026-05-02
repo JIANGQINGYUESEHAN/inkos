@@ -232,7 +232,7 @@ export class PlannerAgent extends BaseAgent {
       language,
     });
 
-    const systemPrompt = getPlannerMemoSystemPrompt(language);
+    const systemPrompt = getPlannerMemoSystemPrompt(language, input.chapterNumber);
 
     let currentUserMessage = userMessage;
     let lastError: PlannerParseError | undefined;
