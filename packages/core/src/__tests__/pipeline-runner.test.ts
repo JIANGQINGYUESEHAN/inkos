@@ -54,7 +54,7 @@ function createAuditResult(overrides: Partial<AuditResult>): AuditResult {
     issues: [],
     summary: "ok",
     overallScore: 90,
-    tokenUsage: ZERO_USAGE,
+    worthLine: "a memorable sentence.",
     ...overrides,
   };
 }
@@ -2228,20 +2228,23 @@ describe("PipelineRunner", () => {
     await runner.writeNextChapter(bookId);
 
     const storyDir = join(state.bookDir(bookId), "story");
+    // With formulaic scoring (computeScore from issues, not overallScore),
+    // chapters with no issues pass on first assessment and skip revision.
+    // Truth files come from the writer output, not the analyzer.
     await expect(readFile(join(storyDir, "current_state.md"), "utf-8"))
-      .resolves.toContain("final analyzed state");
+      .resolves.toContain("original state");
     await expect(readFile(join(storyDir, "pending_hooks.md"), "utf-8"))
-      .resolves.toContain("final analyzed hooks");
+      .resolves.toContain("original hooks");
     await expect(readFile(join(storyDir, "particle_ledger.md"), "utf-8"))
-      .resolves.toContain("final analyzed ledger");
+      .resolves.toContain("original ledger");
     await expect(readFile(join(storyDir, "chapter_summaries.md"), "utf-8"))
-      .resolves.toContain("Final analyzed summary");
+      .resolves.toContain("Original summary");
     await expect(readFile(join(storyDir, "subplot_board.md"), "utf-8"))
-      .resolves.toContain("final analyzed subplots");
+      .resolves.toContain("original subplots");
     await expect(readFile(join(storyDir, "emotional_arcs.md"), "utf-8"))
-      .resolves.toContain("final analyzed emotions");
+      .resolves.toContain("original emotions");
     await expect(readFile(join(storyDir, "character_matrix.md"), "utf-8"))
-      .resolves.toContain("final analyzed matrix");
+      .resolves.toContain("original matrix");
 
     await rm(root, { recursive: true, force: true });
   });

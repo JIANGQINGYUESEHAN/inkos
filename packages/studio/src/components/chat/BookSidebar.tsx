@@ -159,6 +159,7 @@ function ArtifactView({ bookId }: { readonly bookId: string }) {
 
 function PanelView({ bookId, theme: _theme, t, sse }: BookSidebarProps) {
   const isZh = t("nav.connected") === "\u5DF2\u8FDE\u63A5";
+  const bumpBookDataVersion = useChatStore((s) => s.bumpBookDataVersion);
 
   // Show writing indicator only during pipeline operations (write/audit/revise)
   const [activeOp, setActiveOp] = useState<string | null>(null);
@@ -179,6 +180,27 @@ function PanelView({ bookId, theme: _theme, t, sse }: BookSidebarProps) {
       setActiveOp(null);
     }
   }, [sse.messages]);
+
+  // Force sidebar data refresh when any pipeline operation completes.
+  // All sidebar sections watch bookDataVersion and refetch on change.
+  const SIDEBAR_REFRESH_EVENTS = new Set([
+    "write:complete",
+    "draft:complete",
+    "audit:complete",
+    "revise:complete",
+    "rewrite:complete",
+    "import:complete",
+    "fanfic:refresh:complete",
+  ]);
+  useEffect(() => {
+    const last = sse.messages.at(-1);
+    if (!last) return;
+    const data = last.data as { bookId?: string } | null;
+    if (data?.bookId !== bookId) return;
+    if (SIDEBAR_REFRESH_EVENTS.has(last.event)) {
+      bumpBookDataVersion();
+    }
+  }, [sse.messages, bookId, bumpBookDataVersion]);
 
   const OP_LABELS: Record<string, string> = {
     write: isZh ? "正在写作中..." : "Writing...",

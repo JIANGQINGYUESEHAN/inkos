@@ -34,6 +34,19 @@ const MAX_REVIEW_ITERATIONS = 3;
 const PASS_SCORE_THRESHOLD = 85;
 const NET_IMPROVEMENT_EPSILON = 3;
 
+function computeScore(issues: ReadonlyArray<AuditIssue>, worthLine?: string): number {
+  let score = 100;
+  for (const issue of issues) {
+    if (issue.severity === "critical") score -= 25;
+    else if (issue.severity === "warning") score -= 5;
+  }
+  if (worthLine === "_none_" || (worthLine === undefined && issues.length === 0)) {
+    // No worth_line provided or explicitly empty → the chapter has no memorable sentence
+    score -= 15;
+  }
+  return Math.max(0, score);
+}
+
 interface ReviewSnapshot {
   readonly content: string;
   readonly wordCount: number;
@@ -152,7 +165,7 @@ export async function runChapterReviewCycle(params: {
   // ---------------------------------------------------------------------------
   const assess = async (
     content: string,
-    options?: { temperature?: number },
+    options?: { temperature?: number; isRevision?: boolean },
   ): Promise<{ auditResult: AuditResult; score: number; lengthInRange: boolean }> => {
     const llmAudit = await params.auditor.auditChapter(
       params.bookDir,
@@ -170,11 +183,11 @@ export async function runChapterReviewCycle(params: {
     const wordCount = countChapterLength(content, params.lengthSpec.countingMode);
     const lengthInRange = !isOutsideSoftRange(wordCount, params.lengthSpec);
 
-    // Deterministic post-write checks: run every round, not just the first.
-    // If runPostWriteChecks is provided, use it; otherwise fall back to initial postWriteErrors.
+    // Post-write checks: re-run on revised content, fall back to initial errors only on first pass.
+    // On revision passes without runPostWriteChecks, assume the content was already fixed.
     const postWriteIssues = params.runPostWriteChecks
       ? params.runPostWriteChecks(content)
-      : initialPostWriteIssues;
+      : (options?.isRevision ? [] : initialPostWriteIssues);
 
     const allIssues: AuditIssue[] = [
       ...llmAudit.issues,
@@ -187,14 +200,18 @@ export async function runChapterReviewCycle(params: {
     // lengthInRange is only used in isPassed() as a hard gate.
 
     const hasPostWriteCritical = postWriteIssues.some((i) => i.severity === "critical");
+    const worthFromLLM = llmAudit.worthLine;
     const auditResult: AuditResult = {
       passed: (hasBlockedWords || hasPostWriteCritical) ? false : llmAudit.passed,
       issues: allIssues,
       summary: llmAudit.summary,
+      worthLine: worthFromLLM,
       overallScore: llmAudit.overallScore,
     };
 
-    const score = llmAudit.overallScore ?? 0;
+    // Score is computed from LLM audit issues + worth_line only.
+    // Post-write / sensitive / AI-tell issues are hard gates (affect passed), not quality scores.
+    const score = computeScore(llmAudit.issues, worthFromLLM);
 
     return { auditResult, score, lengthInRange };
   };
@@ -252,7 +269,7 @@ export async function runChapterReviewCycle(params: {
       // Re-assess revised content. If REVISED_CONTENT drifted on length,
       // lengthInRange will be false → isPassed fails → bestSnapshot picks
       // the earlier in-range version. No in-loop normalize needed.
-      const nextAssessment = await assess(revisedContent, { temperature: 0 });
+      const nextAssessment = await assess(revisedContent, { temperature: 0, isRevision: true });
 
       snapshots.push({
         content: revisedContent,
@@ -279,7 +296,20 @@ export async function runChapterReviewCycle(params: {
         finalContent = revisedContent;
         finalWordCount = revisedWordCount;
         postReviseCount = revisedWordCount;
-        currentAudit = nextAssessment;
+        // If the re-audit returns passed=false with no issues, keep the previous actionable issues
+        if (!nextAssessment.auditResult.passed && nextAssessment.auditResult.issues.length === 0 &&
+            currentAudit.auditResult.issues.length > 0) {
+          currentAudit = {
+            ...nextAssessment,
+            auditResult: {
+              ...nextAssessment.auditResult,
+              issues: currentAudit.auditResult.issues,
+              summary: currentAudit.auditResult.summary || nextAssessment.auditResult.summary,
+            },
+          };
+        } else {
+          currentAudit = nextAssessment;
+        }
         // Continue to next iteration
       } else {
         params.logWarn({
