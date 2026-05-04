@@ -1,23 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import { MapPin, ChevronDown, Target, AlertTriangle, Pencil, Save, X, CheckCircle2 } from "lucide-react";
+import { MapPin, ChevronDown, AlertTriangle, Pencil, Save, X } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { fetchJson } from "../../hooks/use-api";
 import { SidebarCard } from "./SidebarCard";
-import { cn } from "../../lib/utils";
 
 interface VolOutline {
   volume: string;
   title: string;
   excerpt: string;
   endReqs: string[];
-}
-
-interface ChapterCheck {
-  chapter: number;
-  title: string;
-  volume: string;
-  status: "ok" | "warn";
-  reason: string;
 }
 
 function parseVolumeMapSimple(md: string): VolOutline[] {
@@ -48,51 +39,24 @@ function parseVolumeMapSimple(md: string): VolOutline[] {
   return results;
 }
 
-function estimateVolumePerChapter(md: string, totalChapters: number): number {
-  const sections = (md.match(/^## /gm) || []).length;
-  return Math.max(50, Math.ceil(totalChapters / Math.max(sections, 1)));
-}
-
 export function OutlineSection({ bookId }: { readonly bookId: string }) {
   const [outline, setOutline] = useState<VolOutline[]>([]);
-  const [chapterCount, setChapterCount] = useState(0);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState("");
   const [saving, setSaving] = useState(false);
   const [rawContent, setRawContent] = useState("");
-  const [checks, setChecks] = useState<ChapterCheck[]>([]);
   const bookDataVersion = useChatStore((s) => s.bookDataVersion);
 
   const load = useCallback(() => {
     if (!bookId) return;
-    Promise.all([
-      fetchJson<{ content: string | null }>(`/books/${bookId}/truth/outline/volume_map.md`),
-      fetchJson<{ chapters: Array<{ number: number; title: string }> }>(`/books/${bookId}`),
-    ])
-      .then(([mapData, bookData]) => {
+    fetchJson<{ content: string | null }>(`/books/${bookId}/truth/outline/volume_map.md`)
+      .then((mapData) => {
         if (mapData?.content) {
           setRawContent(mapData.content);
           setOutline(parseVolumeMapSimple(mapData.content));
-          if (bookData?.chapters) {
-            setChapterCount(bookData.chapters.length);
-            const chPerVol = estimateVolumePerChapter(mapData.content, bookData.chapters.length);
-            const newChecks: ChapterCheck[] = [];
-            for (const ch of bookData.chapters.slice(-5)) {
-              const volIdx = Math.min(Math.floor((ch.number - 1) / chPerVol), Math.max(0, Math.floor(1500 / chPerVol) - 1));
-              newChecks.push({
-                chapter: ch.number,
-                title: ch.title,
-                volume: `第${volIdx + 1}卷`,
-                status: "ok",
-                reason: `在第${volIdx + 1}卷区间内`,
-              });
-            }
-            setChecks(newChecks);
-          }
         } else {
           setRawContent("");
           setOutline([]);
-          setChapterCount(0);
         }
       })
       .catch(() => {
@@ -139,9 +103,6 @@ export function OutlineSection({ bookId }: { readonly bookId: string }) {
 
   if (!hasContent) return null;
 
-  const chPerVol = Math.max(1, Math.ceil(chapterCount / Math.max(1, outline.length)));
-  const currentVolume = Math.min(outline.length, Math.max(1, Math.ceil(chapterCount / chPerVol)));
-
   if (editing) {
     return (
       <SidebarCard title="大纲" icon={<MapPin size={14} className="text-amber-400" />}>
@@ -175,34 +136,13 @@ export function OutlineSection({ bookId }: { readonly bookId: string }) {
       }
     >
       <div className="space-y-2">
-        <div className="text-[10px] text-muted-foreground/60 px-1">
-          第 {chapterCount} 章 · 当前：第{currentVolume}卷
-        </div>
-
-        {/* Cross-reference check against existing chapters */}
-        {checks.length > 0 && (
-          <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-2">
-            <div className="text-[9px] text-emerald-600/70 mb-1 flex items-center gap-1">
-              <CheckCircle2 size={9} /> 前文校验
-            </div>
-            {checks.map((c) => (
-              <div key={c.chapter} className="flex items-center gap-1 text-[9px]">
-                <span className={cn(c.status === "ok" ? "text-emerald-600" : "text-amber-600")}>
-                  Ch{c.chapter} {c.title}
-                </span>
-                <span className="text-muted-foreground/50">{c.reason}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {outline.length > 0 ? (
-          outline.map((vol, i) => {
-            const isCurrent = i + 1 === currentVolume;
+          outline.map((vol) => {
             return (
               <div
                 key={vol.volume}
-                className={cn("rounded-lg overflow-hidden", isCurrent ? "bg-primary/10 border border-primary/20" : "bg-secondary/30")}
+                className="rounded-lg overflow-hidden bg-secondary/30"
               >
                 <button
                   onClick={(e) => {
@@ -211,7 +151,7 @@ export function OutlineSection({ bookId }: { readonly bookId: string }) {
                   }}
                   className="w-full flex items-center gap-2 px-2.5 py-2 text-left"
                 >
-                  {isCurrent ? <Target size={12} className="text-primary shrink-0" /> : <span className="w-3 h-3 rounded-full bg-muted-foreground/20 shrink-0" />}
+                  <span className="w-3 h-3 rounded-full bg-muted-foreground/20 shrink-0" />
                   <span className="text-sm font-medium text-foreground font-['SimSun','Songti_SC','STSong',serif] flex-1 truncate">
                     第{vol.volume}卷
                   </span>

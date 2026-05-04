@@ -62,14 +62,14 @@ export function SummarySection({ bookId }: SummarySectionProps) {
   return (
     <>
       {summary.world && (
-        <SidebarCard title="世界观">
+        <SidebarCard title="世界观" defaultOpen={false}>
           <Streamdown className={SIDEBAR_MD_CLASS} plugins={streamdownPlugins}>
             {summary.world}
           </Streamdown>
         </SidebarCard>
       )}
       {(summary.protagonist || summary.cast) && (
-        <SidebarCard title="角色">
+        <SidebarCard title="角色" defaultOpen={false}>
           {summary.protagonist && (
             <Streamdown className={SIDEBAR_MD_CLASS} plugins={streamdownPlugins}>
               {summary.protagonist}

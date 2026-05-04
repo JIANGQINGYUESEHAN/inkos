@@ -20,6 +20,7 @@ const baseProfile: GenreProfile = {
   powerScaling: false,
   eraResearch: false,
   auditDimensions: [],
+  sidebarSections: [],
   satisfactionTypes: [],
 };
 

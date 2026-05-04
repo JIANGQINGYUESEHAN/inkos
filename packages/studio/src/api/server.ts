@@ -821,9 +821,9 @@ export function createStudioServer(initialConfig: ProjectConfig, root: string) {
       rawGenres.map(async (g) => {
         try {
           const { profile } = await readGenreProfile(root, g.id);
-          return { ...g, language: profile.language ?? "zh" };
+          return { ...g, language: profile.language ?? "zh", sidebarSections: profile.sidebarSections ?? ["chapters", "characters", "outline", "foundation", "summary"] };
         } catch {
-          return { ...g, language: "zh" };
+          return { ...g, language: "zh", sidebarSections: ["chapters", "characters", "outline", "foundation", "summary"] };
         }
       }),
     );

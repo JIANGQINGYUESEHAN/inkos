@@ -15,7 +15,6 @@ import { CharacterSection } from "../sidebar/CharacterSection";
 import { StorageBagSection } from "../sidebar/StorageBagSection";
 import { WorldLedgerSection } from "../sidebar/WorldLedgerSection";
 import { OutlineSection } from "../sidebar/OutlineSection";
-import { WritingPreview } from "../sidebar/WritingPreview";
 
 export interface BookSidebarProps {
   readonly bookId: string;
@@ -26,13 +25,16 @@ export interface BookSidebarProps {
 
 const FOUNDATION_LABELS: Record<string, string> = {
   "story_bible.md": "世界观设定",
-  "volume_outline.md": "卷纲规划",
   "book_rules.md": "叙事规则",
-  "current_state.md": "状态卡",
+  "current_state.md": "当前状态",
+  "current_focus.md": "当前聚焦",
   "pending_hooks.md": "伏笔池",
   "subplot_board.md": "支线进度",
   "emotional_arcs.md": "感情线",
-  "character_matrix.md": "角色矩阵",
+  "chapter_summaries.md": "章节摘要",
+  "audit_drift.md": "审计纠偏",
+  "author_intent.md": "作者意图",
+  "style_guide.md": "文风指南",
 };
 
 const streamdownPlugins = { cjk };
@@ -161,6 +163,29 @@ function PanelView({ bookId, theme: _theme, t, sse }: BookSidebarProps) {
   const isZh = t("nav.connected") === "\u5DF2\u8FDE\u63A5";
   const bumpBookDataVersion = useChatStore((s) => s.bumpBookDataVersion);
 
+  // Load genre-specific sidebar section visibility
+  const [sidebarSections, setSidebarSections] = useState<string[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // Get book config to find genre
+        const bookData = await fetchJson<{ book: { genre: string } }>(`/books/${bookId}`);
+        if (cancelled || !bookData?.book?.genre) return;
+        // Get genre profile sidebar sections
+        const genreData = await fetchJson<{ genres: Array<{ id: string; sidebarSections: string[] }> }>("/genres");
+        if (cancelled) return;
+        const genre = genreData?.genres?.find((g) => g.id === bookData.book.genre);
+        setSidebarSections(genre?.sidebarSections ?? null);
+      } catch {
+        if (!cancelled) setSidebarSections(null); // null = show all
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [bookId]);
+
+  const showSection = (key: string) => !sidebarSections || sidebarSections.includes(key);
+
   // Show writing indicator only during pipeline operations (write/audit/revise)
   const [activeOp, setActiveOp] = useState<string | null>(null);
   useEffect(() => {
@@ -218,15 +243,14 @@ function PanelView({ bookId, theme: _theme, t, sse }: BookSidebarProps) {
           </span>
         </div>
       )}
-      <WritingPreview isZh={isZh} />
       <ProgressSection sse={sse} />
-      <ChaptersSection bookId={bookId} isZh={isZh} />
-      <CharacterSection bookId={bookId} />
-      <StorageBagSection bookId={bookId} />
-      <WorldLedgerSection bookId={bookId} />
-      <OutlineSection bookId={bookId} />
-      <FoundationSection bookId={bookId} />
-      <SummarySection bookId={bookId} />
+      {showSection("chapters") && <ChaptersSection bookId={bookId} isZh={isZh} />}
+      {showSection("characters") && <CharacterSection bookId={bookId} />}
+      {showSection("storage-bag") && <StorageBagSection bookId={bookId} />}
+      {showSection("world-ledger") && <WorldLedgerSection bookId={bookId} />}
+      {showSection("outline") && <OutlineSection bookId={bookId} />}
+      {showSection("foundation") && <FoundationSection bookId={bookId} />}
+      {showSection("summary") && <SummarySection bookId={bookId} />}
     </div>
   );
 }
@@ -265,7 +289,7 @@ export function BookSidebar({ bookId, theme, t, sse }: BookSidebarProps) {
 
   return (
     <aside
-      className="hidden lg:flex shrink-0 flex-col bg-background/30 backdrop-blur-sm overflow-y-auto relative"
+      className="hidden lg:flex shrink-0 flex-col bg-background/30 backdrop-blur-sm relative"
       style={{ width }}
     >
       {/* Resize handle */}
@@ -273,10 +297,15 @@ export function BookSidebar({ bookId, theme, t, sse }: BookSidebarProps) {
         onMouseDown={onMouseDown}
         className="absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/20 active:bg-primary/30 transition-colors z-10"
       />
-      {sidebarView === "artifact" ? (
-        <ArtifactView bookId={bookId} />
-      ) : (
+      {/* Panel view — always mounted to preserve scroll position */}
+      <div className={sidebarView === "artifact" ? "hidden" : "overflow-y-auto flex-1"}>
         <PanelView bookId={bookId} theme={theme} t={t} sse={sse} />
+      </div>
+      {/* Artifact view — overlays panel when active */}
+      {sidebarView === "artifact" && (
+        <div className="absolute inset-0 z-20 bg-background overflow-y-auto">
+          <ArtifactView bookId={bookId} />
+        </div>
       )}
     </aside>
   );

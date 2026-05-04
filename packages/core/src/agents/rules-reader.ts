@@ -38,7 +38,18 @@ export async function readGenreProfile(
     throw new Error(`Genre profile not found for "${genreId}" and fallback "other.md" is missing`);
   }
 
-  return parseGenreProfile(raw);
+  const parsed = parseGenreProfile(raw);
+
+  // Prepend universal writing craft for Chinese-language genres
+  const craftPath = join(BUILTIN_GENRES_DIR, "_craft_zh.md");
+  const projectCraftPath = join(projectRoot, "genres", "_craft_zh.md");
+  const craftRaw = (await tryReadFile(projectCraftPath)) ?? (await tryReadFile(craftPath));
+  if (craftRaw && parsed.profile.language !== "en") {
+    const craftBody = craftRaw.trim();
+    return { ...parsed, body: craftBody + "\n\n" + parsed.body };
+  }
+
+  return parsed;
 }
 
 /**

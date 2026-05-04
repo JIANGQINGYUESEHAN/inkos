@@ -6,15 +6,16 @@ import { SidebarCard } from "./SidebarCard";
 
 const FOUNDATION_FILES: ReadonlyArray<{ file: string; label: string }> = [
   { file: "story_bible.md", label: "世界观设定" },
-  { file: "volume_outline.md", label: "卷纲规划" },
   { file: "book_rules.md", label: "叙事规则" },
-  { file: "current_state.md", label: "状态卡" },
+  { file: "current_state.md", label: "当前状态" },
+  { file: "current_focus.md", label: "当前聚焦" },
   { file: "pending_hooks.md", label: "伏笔池" },
   { file: "subplot_board.md", label: "支线进度" },
   { file: "emotional_arcs.md", label: "感情线" },
-  { file: "character_matrix.md", label: "角色矩阵" },
-  { file: "particle_ledger.md", label: "资源账本" },
-  { file: "world_ledger.md", label: "世界账本" },
+  { file: "audit_drift.md", label: "审计纠偏" },
+  { file: "chapter_summaries.md", label: "章节摘要" },
+  { file: "author_intent.md", label: "作者意图" },
+  { file: "style_guide.md", label: "文风指南" },
 ];
 
 interface TruthFileInfo {
@@ -44,7 +45,7 @@ export function FoundationSection({ bookId }: FoundationSectionProps) {
   if (available.length === 0) return null;
 
   return (
-    <SidebarCard title="核心文件">
+    <SidebarCard title="核心文件" defaultOpen={false}>
       <ul className="space-y-1">
         {available.map((item) => (
           <li key={item.file}>

@@ -28,6 +28,7 @@ const GENRE: GenreProfile = {
   pacingRule: "",
   satisfactionTypes: [],
   auditDimensions: [],
+  sidebarSections: [],
 };
 
 describe("buildWriterSystemPrompt", () => {
